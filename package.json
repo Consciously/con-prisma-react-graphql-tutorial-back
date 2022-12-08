@@ -1,0 +1,38 @@
+{
+	"name": "backend",
+	"version": "1.0.0",
+	"description": "con-prisma-react-graphql-tutorial-back",
+	"main": "index.js",
+	"prisma": {
+		"seed": "ts-node-dev prisma/seed.ts"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "ts-node-dev src/index.ts"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Consciously/con-prisma-react-graphql-tutorial-back.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/Consciously/con-prisma-react-graphql-tutorial-back/issues"
+	},
+	"homepage": "https://github.com/Consciously/con-prisma-react-graphql-tutorial-back#readme",
+	"devDependencies": {
+		"@types/node": "^18.11.11",
+		"prisma": "^4.7.1",
+		"ts-node-dev": "^2.0.0",
+		"typescript": "^4.9.4"
+	},
+	"dependencies": {
+		"@graphql-yoga/node": "^3.1.1",
+		"@pothos/core": "^3.23.1",
+		"@pothos/plugin-prisma": "^3.38.0",
+		"@prisma/client": "^4.7.1",
+		"graphql": "^16.6.0",
+		"graphql-scalars": "^1.20.1"
+	}
+}
