@@ -9,7 +9,7 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"start": "node ./dist/src/index.js",
-		"build": "npm install && npx tsc"
+		"build": "npm install && npx tsc && npx prisma generate"
 	},
 	"repository": {
 		"type": "git",
