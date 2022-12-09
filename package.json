@@ -9,7 +9,7 @@
 	"scripts": {
 		"clean": "rm -rf dist",
 		"start": "node dist/index",
-		"build": "npm run clean && npm run generate && npx tsc",
+		"build": "npm run clean && npm i && npm run generate && npx tsc",
 		"generate": "npm run generate:prisma && npm run generate:pothos",
 		"generate:prisma": "npx prisma generate",
 		"generate:pothos": "ts-node --transpile-only src/schema"
