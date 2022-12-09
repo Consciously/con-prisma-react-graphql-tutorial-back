@@ -1,14 +1,16 @@
 // src/index.ts
-import http from 'http';
+import express from 'express';
 import { createYoga } from 'graphql-yoga';
 import { schema } from './schema';
 
+const app = express();
+
 const port = Number(process.env.API_PORT) || 4000;
 
-const yoga = createYoga({ schema });
+const yoga = createYoga({ schema, logging: 'debug' });
 
-const server = http.createServer(yoga);
+app.use('/graphql', yoga);
 
-server.listen(port, () => {
+app.listen(port, () => {
 	console.log(`Server is running on http://localhost:${port}/graphql`);
 });
