@@ -51,6 +51,21 @@ const main = async () => {
 			},
 		},
 	});
+	await prisma.user.create({
+		data: {
+			name: 'Sam',
+			messages: {
+				create: [
+					{
+						body: 'A Note for Sam',
+					},
+					{
+						body: 'Another note for Sam',
+					},
+				],
+			},
+		},
+	});
 };
 
 main().then(() => {
