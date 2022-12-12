@@ -12,7 +12,8 @@
 		"build": "npm run clean && npm i && npm run generate && npx tsc",
 		"generate": "npm run generate:prisma && npm run generate:pothos",
 		"generate:prisma": "npx prisma generate",
-		"generate:pothos": "ts-node --transpile-only src/schema"
+		"generate:pothos": "ts-node --transpile-only src/schema",
+		"seed": "ts-node --transpile-only prisma/seed"
 	},
 	"repository": {
 		"type": "git",
