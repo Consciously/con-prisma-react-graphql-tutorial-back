@@ -41,7 +41,6 @@ const getJsonRawData = () => {
 };
 
 const getJsonData = (): UserData => {
-	console.log(getJsonRawData());
 	const userArray = getJsonRawData()[0].dataArray;
 
 	return userArray.map(({ data }): User => {
