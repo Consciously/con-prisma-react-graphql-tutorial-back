@@ -2,26 +2,26 @@
 	"dataArray": [
 		{
 			"data": {
-				"name": "John",
+				"name": "Jane",
 				"messages": [
 					{
-						"body": "Note from John"
+						"body": "Note from Jane"
 					},
 					{
-						"body": "Another note from John"
+						"body": "Another note from Jane"
 					}
 				]
 			}
 		},
 		{
 			"data": {
-				"name": "Mary",
+				"name": "Susan",
 				"messages": [
 					{
-						"body": "Note from Mary"
+						"body": "Note from Susan"
 					},
 					{
-						"body": "Another note from Mary"
+						"body": "Another note from Susan"
 					}
 				]
 			}
