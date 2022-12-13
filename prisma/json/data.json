@@ -1,0 +1,30 @@
+{
+	"dataArray": [
+		{
+			"data": {
+				"name": "John",
+				"messages": [
+					{
+						"body": "Note from John"
+					},
+					{
+						"body": "Another note from John"
+					}
+				]
+			}
+		},
+		{
+			"data": {
+				"name": "Mary",
+				"messages": [
+					{
+						"body": "Note from Mary"
+					},
+					{
+						"body": "Another note from Mary"
+					}
+				]
+			}
+		}
+	]
+}
