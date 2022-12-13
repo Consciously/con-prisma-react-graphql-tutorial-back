@@ -30,7 +30,7 @@ const jsonDirectory = path.join(process.cwd(), 'prisma/json');
 const getJsonRawData = () => {
 	const fileNames = fs.readdirSync(jsonDirectory);
 
-	return fileNames.flatMap(fileName => {
+	return fileNames.map(fileName => {
 		const fullPath = path.join(jsonDirectory, fileName);
 		const fileContents = fs.readFileSync(fullPath, 'utf-8');
 
@@ -41,6 +41,7 @@ const getJsonRawData = () => {
 };
 
 const getJsonData = (): UserData => {
+	console.log(getJsonRawData());
 	const userArray = getJsonRawData()[0].dataArray;
 
 	return userArray.map(({ data }): User => {
@@ -54,5 +55,7 @@ const getJsonData = (): UserData => {
 		};
 	});
 };
+
+getJsonData();
 
 export default getJsonData;
