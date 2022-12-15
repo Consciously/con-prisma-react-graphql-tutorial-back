@@ -1,0 +1,11 @@
+{
+	"name": "test",
+	"cwd": "./",
+	"src": "prisma/",
+	"filePattern": "**/*.md",
+	"ignore": "*(icon|input)*",
+	"dist": "prisma/json/test.json",
+	"metadata": true,
+	"server": false,
+	"deterministicOrder": false
+}
