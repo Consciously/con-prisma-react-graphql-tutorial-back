@@ -2,11 +2,11 @@ import { Parser, HtmlRenderer, Node } from 'commonmark';
 import * as fs from 'fs';
 import path from 'path';
 
-type NodeObject = {
+interface NodeObject {
 	type: string;
-	level: number;
+	level?: number;
 	nodes: Node[];
-};
+}
 
 const readFilesFromSystem = (pathName: string): string[] => {
 	const fileDirectory = path.join(process.cwd(), pathName);
@@ -19,7 +19,7 @@ const readFilesFromSystem = (pathName: string): string[] => {
 	});
 };
 
-const parseMarkdownData = (): Node[] => {
+const readMarkdownFiles = () => {
 	const markdownFileArray = readFilesFromSystem('/prisma/markdown');
 
 	const parser = new Parser();
@@ -31,33 +31,31 @@ const parseMarkdownData = (): Node[] => {
 	});
 };
 
-const extractMarkdown = () => {
-	const nodes = parseMarkdownData();
-	const htmlObj = {};
-	const objFromAST: NodeObject = {
-		type: '',
-		level: 0,
+const createNodeObject = (node: Node): NodeObject => {
+	const obj: NodeObject = {
+		type: node.type,
 		nodes: [],
 	};
 
+	obj.level = node.level;
+
+	let currentChild = node.firstChild;
+	while (currentChild !== null) {
+		const childObject = currentChild;
+		obj.nodes.push(childObject);
+		currentChild = currentChild.next;
+	}
+	return obj;
+};
+
+const convertASTObjectToHtmlObject = () => {
+	const nodes = readMarkdownFiles();
+	const htmlObjArray: {}[] = [];
+
 	nodes.forEach(node => {
-		objFromAST.type = node.type;
+		const objFromAST = createNodeObject(node);
 
-		if (node.hasOwnProperty('level')) {
-			objFromAST.level = node.level;
-		}
-
-		const childNodes: Node[] = [];
-		let currentChild = node.firstChild;
-
-		while (currentChild !== null) {
-			const childObject = currentChild;
-			childNodes.push(childObject);
-			currentChild = currentChild.next;
-		}
-
-		objFromAST.nodes = childNodes;
-
+		const htmlObj = {};
 		objFromAST.nodes.map(objNode => {
 			const htmlRenderer = new HtmlRenderer();
 			const html = htmlRenderer.render(objNode);
@@ -66,15 +64,36 @@ const extractMarkdown = () => {
 
 			return htmlObj;
 		});
+
+		htmlObjArray.push(htmlObj);
 	});
 
-	console.log(htmlObj);
+	return htmlObjArray;
 };
 
-extractMarkdown();
+const convertToJson = () => {
+	const htmlDataArray = convertASTObjectToHtmlObject();
+
+	// Create a new array for each iteration of the loop
+	const jsonData: string[] = [];
+	htmlDataArray.forEach((htmlData, index) => {
+		const htmlDataString = JSON.stringify(htmlData, null, 2);
+		jsonData.push(htmlDataString);
+	});
+
+	// Combine all the arrays into a single array
+	const combinedJsonData = jsonData;
+	const jsonString = JSON.stringify(combinedJsonData, null, 4);
+	fs.writeFileSync('./prisma/json/htmlData.json', jsonString);
+};
 
 // const convertToJson = () => {
-// 	extractMarkdown();
+// 	const htmlDataArray = convertASTObjectToHtmlObject();
+
+// 	htmlDataArray.forEach((htmlData, index) => {
+// 		const htmlDataString = JSON.stringify(htmlData, null, 2);
+// 		fs.writeFileSync(`./prisma/json/htmlData${index}.json`, htmlDataString);
+// 	});
 // };
 
-// convertToJson();
+convertToJson();

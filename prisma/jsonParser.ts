@@ -1,3 +1,4 @@
+import e from 'express';
 import fs from 'fs';
 import path from 'path';
 
@@ -27,32 +28,48 @@ type UserData = User[];
 
 const jsonDirectory = path.join(process.cwd(), 'prisma/json');
 
-const getJsonRawData = () => {
-	const fileNames = fs.readdirSync(jsonDirectory);
+const getJsonRawData = (): RawUser[] => {
+	let result: RawUser[] = [];
+	try {
+		if (fs.existsSync(jsonDirectory)) {
+			const fileNames = fs.readdirSync(jsonDirectory);
+			result = fileNames.map(fileName => {
+				const fullPath = path.join(jsonDirectory, fileName);
+				const fileContents = fs.readFileSync(fullPath, 'utf-8');
+				const parsedContents: RawUser = JSON.parse(fileContents);
+				return parsedContents;
+			});
+		} else {
+			console.error('No json directory found');
+		}
+	} catch (error) {
+		console.error(error);
+	}
 
-	return fileNames.map(fileName => {
-		const fullPath = path.join(jsonDirectory, fileName);
-		const fileContents = fs.readFileSync(fullPath, 'utf-8');
-
-		const parsedContents: RawUser = JSON.parse(fileContents);
-
-		return parsedContents;
-	});
+	return result;
 };
 
 const getJsonData = (): UserData => {
-	const userArray = getJsonRawData()[0].dataArray;
+	let result: User[] = [];
 
-	return userArray.map(({ data }): User => {
-		return {
-			data: {
-				name: data.name,
-				messages: {
-					create: data.messages,
+	try {
+		const userArray = getJsonRawData()[0].dataArray;
+
+		result = userArray.map(({ data }): User => {
+			return {
+				data: {
+					name: data.name,
+					messages: {
+						create: data.messages,
+					},
 				},
-			},
-		};
-	});
+			};
+		});
+	} catch (error) {
+		console.error(error);
+	}
+
+	return result;
 };
 
 getJsonData();
