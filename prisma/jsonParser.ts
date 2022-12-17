@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
+import {
+	getFilesFromDirectory,
+	readContentFromFile,
+} from '../src/utilities/handleFiles';
 
 type RawUser = {
 	dataArray: {
 		data: {
 			name: string;
-			messages: {
-				body: string;
-			}[];
+			messages: string[];
 		};
 	}[];
 };
@@ -25,52 +25,46 @@ type User = {
 
 type UserData = User[];
 
-const jsonDirectory = path.join(process.cwd(), 'prisma/json');
-
-const getJsonRawData = (): RawUser[] => {
-	let result: RawUser[] = [];
+const getJsonRawData = async (): Promise<RawUser[] | undefined> => {
 	try {
-		if (fs.existsSync(jsonDirectory)) {
-			const fileNames = fs.readdirSync(jsonDirectory);
-			result = fileNames.map(fileName => {
-				const fullPath = path.join(jsonDirectory, fileName);
-				const fileContents = fs.readFileSync(fullPath, 'utf-8');
-				const parsedContents: RawUser = JSON.parse(fileContents);
-				return parsedContents;
-			});
-		} else {
-			console.error('No json directory found');
+		const allFiles = await getFilesFromDirectory('prisma/json');
+
+		return Promise.all(
+			allFiles.map(async file => {
+				const content: RawUser = JSON.parse(
+					await readContentFromFile('prisma/json', file),
+				);
+
+				return content;
+			}),
+		);
+	} catch (error) {
+		console.error(error);
+		return undefined;
+	}
+
+	// return result;
+};
+
+const getJsonUserData = async (): Promise<UserData | undefined> => {
+	try {
+		const jsonRawData = await getJsonRawData();
+
+		if (typeof jsonRawData !== 'undefined') {
+			return await Promise.all(
+				jsonRawData.map(async ({ dataArray }): Promise<User> => {
+					return dataArray as unknown as User;
+				}),
+			);
 		}
 	} catch (error) {
 		console.error(error);
+		return undefined;
 	}
-
-	return result;
 };
 
-const getJsonData = (): UserData => {
-	let result: User[] = [];
+getJsonUserData().then(data => {
+	data && console.log(data[0]);
+});
 
-	try {
-		const userArray = getJsonRawData()[0].dataArray;
-
-		result = userArray.map(({ data }): User => {
-			return {
-				data: {
-					name: data.name,
-					messages: {
-						create: data.messages,
-					},
-				},
-			};
-		});
-	} catch (error) {
-		console.error(error);
-	}
-
-	return result;
-};
-
-getJsonData();
-
-export default getJsonData;
+export default getJsonUserData;

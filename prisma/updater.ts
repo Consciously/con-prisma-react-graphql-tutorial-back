@@ -4,10 +4,13 @@ import getJsonData from './jsonParser';
 const prisma = new PrismaClient();
 
 const updateDb = async (): Promise<void> => {
-	const users = getJsonData();
+	try {
+		const users = getJsonData();
 
-	for (const user of users) {
-		await prisma.user.create(user);
+		const createUserPromises = users.map(user => prisma.user.create(user));
+		await Promise.all(createUserPromises);
+	} catch (error) {
+		console.error(error);
 	}
 };
 
