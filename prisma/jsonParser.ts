@@ -12,6 +12,8 @@ type RawUser = {
 	}[];
 };
 
+type RawUserArray = RawUser[];
+
 type User = {
 	data: {
 		name: string;
@@ -25,11 +27,11 @@ type User = {
 
 type UserData = User[];
 
-const getJsonRawData = async (): Promise<RawUser[] | undefined> => {
+const getJsonRawData = async (): Promise<RawUserArray | undefined> => {
 	try {
 		const allFiles = await getFilesFromDirectory('prisma/json');
 
-		return Promise.all(
+		return await Promise.all(
 			allFiles.map(async file => {
 				const content: RawUser = JSON.parse(
 					await readContentFromFile('prisma/json', file),
@@ -40,31 +42,36 @@ const getJsonRawData = async (): Promise<RawUser[] | undefined> => {
 		);
 	} catch (error) {
 		console.error(error);
-		return undefined;
+		return [];
 	}
-
-	// return result;
 };
 
 const getJsonUserData = async (): Promise<UserData | undefined> => {
 	try {
 		const jsonRawData = await getJsonRawData();
 
-		if (typeof jsonRawData !== 'undefined') {
-			return await Promise.all(
-				jsonRawData.map(async ({ dataArray }): Promise<User> => {
-					return dataArray as unknown as User;
-				}),
-			);
+		if (Array.isArray(jsonRawData) && jsonRawData.length > 0) {
+			const dataArray = jsonRawData[0].dataArray;
+
+			if (Array.isArray(dataArray)) {
+				return Promise.all(
+					jsonRawData[0].dataArray.map(async ({ data }): Promise<User> => {
+						return {
+							data: {
+								name: data.name,
+								messages: {
+									create: data.messages.map(message => ({ body: message })),
+								},
+							},
+						};
+					}),
+				);
+			}
 		}
 	} catch (error) {
 		console.error(error);
-		return undefined;
+		return [];
 	}
 };
-
-getJsonUserData().then(data => {
-	data && console.log(data[0]);
-});
 
 export default getJsonUserData;

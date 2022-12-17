@@ -20,12 +20,6 @@
 		},
 		{
 			"data": {
-				"name": "Sam",
-				"messages": ["Note from Sam", "Another note from Sam"]
-			}
-		},
-		{
-			"data": {
 				"name": "Susan",
 				"messages": ["Note from Susan", "Another note from Susan"]
 			}
