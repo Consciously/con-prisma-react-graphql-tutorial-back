@@ -13,9 +13,9 @@
 		"generate": "npm run generate:prisma && npm run generate:pothos",
 		"generate:prisma": "npx prisma generate",
 		"generate:pothos": "ts-node --transpile-only src/schema",
-		"seed": "ts-node --transpile-only prisma/seed",
-		"update": "ts-node --transpile-only prisma/updater",
-		"convert": "ts-node --transpile-only prisma/markdownToJson"
+		"seed": "ts-node --transpile-only src/utilities/seed",
+		"update": "ts-node --transpile-only src/utilities/updater",
+		"convert": "ts-node --transpile-only src/utilities/markdownToJson"
 	},
 	"repository": {
 		"type": "git",
