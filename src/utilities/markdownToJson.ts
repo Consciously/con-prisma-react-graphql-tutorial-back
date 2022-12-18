@@ -20,7 +20,7 @@ const readFilesFromSystem = (pathName: string): string[] => {
 };
 
 const readMarkdownFiles = () => {
-	const markdownFileArray = readFilesFromSystem('/prisma/markdown');
+	const markdownFileArray = readFilesFromSystem('prisma/markdown');
 
 	const parser = new Parser();
 
@@ -41,7 +41,7 @@ const createNodeObject = (node: Node): NodeObject => {
 
 	let currentChild = node.firstChild;
 	while (currentChild !== null) {
-		const childObject = currentChild;
+		const childObject: Node = currentChild;
 		obj.nodes.push(childObject);
 		currentChild = currentChild.next;
 	}
@@ -55,16 +55,12 @@ const convertASTObjectToHtmlObject = () => {
 	nodes.forEach(node => {
 		const objFromAST = createNodeObject(node);
 
-		const htmlObj = {};
-		objFromAST.nodes.map(objNode => {
-			const htmlRenderer = new HtmlRenderer();
-			const html = htmlRenderer.render(objNode);
+		const htmlRenderer = new HtmlRenderer();
+		const html = objFromAST.nodes.reduce((htmlString, objNode) => {
+			return htmlString + htmlRenderer.render(objNode);
+		}, '');
 
-			htmlObj[objNode.type] = html;
-
-			return htmlObj;
-		});
-
+		const htmlObj = { html };
 		htmlObjArray.push(htmlObj);
 	});
 
@@ -83,17 +79,8 @@ const convertToJson = () => {
 
 	// Combine all the arrays into a single array
 	const combinedJsonData = jsonData;
-	const jsonString = JSON.stringify(combinedJsonData, null, 4);
+	const jsonString = JSON.stringify(combinedJsonData, null, 2);
 	fs.writeFileSync('./prisma/json/htmlData.json', jsonString);
 };
-
-// const convertToJson = () => {
-// 	const htmlDataArray = convertASTObjectToHtmlObject();
-
-// 	htmlDataArray.forEach((htmlData, index) => {
-// 		const htmlDataString = JSON.stringify(htmlData, null, 2);
-// 		fs.writeFileSync(`./prisma/json/htmlData${index}.json`, htmlDataString);
-// 	});
-// };
 
 convertToJson();
