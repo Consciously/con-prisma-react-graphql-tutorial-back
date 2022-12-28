@@ -37,4 +37,11 @@ export const readContentFromFile = async (
 
 // write files to directory
 
-export const writeFilesToDir = () => {};
+export const writeFilesToDir = async (
+	pathSegment: string,
+	file: string,
+	data: string,
+): Promise<void> => {
+	const directory = getDirectory(pathSegment);
+	await writeFiles(`${directory}/${file}`, data);
+};

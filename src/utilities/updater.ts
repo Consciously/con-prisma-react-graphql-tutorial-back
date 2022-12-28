@@ -11,6 +11,8 @@ const updateDb = async (): Promise<void> => {
 				await prisma.user.create(user);
 			}
 		}
+		// const users = await getJsonUserData();
+		// console.log(users);
 	} catch (error) {
 		console.error(error);
 	}

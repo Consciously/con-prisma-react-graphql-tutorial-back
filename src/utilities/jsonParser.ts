@@ -1,37 +1,14 @@
 import { getFilesFromDirectory, readContentFromFile } from './handleFiles';
-
-type RawUser = {
-	dataArray: {
-		data: {
-			name: string;
-			messages: string[];
-		};
-	}[];
-};
-
-type RawUserArray = RawUser[];
-
-type User = {
-	data: {
-		name: string;
-		messages: {
-			create: {
-				body: string;
-			}[];
-		};
-	};
-};
-
-type UserData = User[];
+import { RawUser, RawUserArray, User, UserArray } from './types';
 
 const getJsonRawData = async (): Promise<RawUserArray | undefined> => {
 	try {
-		const jsonFiles = await getFilesFromDirectory('prisma/json');
+		const jsonFiles = await getFilesFromDirectory('prisma/json/ready');
 
 		return await Promise.all(
 			jsonFiles.map(async file => {
 				const content = JSON.parse(
-					await readContentFromFile('prisma/json', file),
+					await readContentFromFile('prisma/json/ready', file),
 				);
 
 				return content as RawUser;
@@ -42,7 +19,7 @@ const getJsonRawData = async (): Promise<RawUserArray | undefined> => {
 	}
 };
 
-const getJsonUserData = async (): Promise<UserData | undefined> => {
+const getJsonUserData = async (): Promise<UserArray | undefined> => {
 	try {
 		const jsonRawData = await getJsonRawData();
 
@@ -51,6 +28,7 @@ const getJsonUserData = async (): Promise<UserData | undefined> => {
 
 			return Promise.all(
 				dataArray.map(async ({ data }): Promise<User> => {
+					console.log(data);
 					return {
 						data: {
 							name: data.name,

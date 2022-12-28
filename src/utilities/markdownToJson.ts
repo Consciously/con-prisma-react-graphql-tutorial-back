@@ -1,31 +1,42 @@
 import { Parser, HtmlRenderer, Node } from 'commonmark';
-import * as fs from 'fs';
-import path from 'path';
+import {
+	getFilesFromDirectory,
+	readContentFromFile,
+	writeFilesToDir,
+} from './handleFiles';
 
-interface NodeObject {
+type NodeObject = {
 	type: string;
 	level?: number;
 	nodes: Node[];
-}
-
-const readFilesFromSystem = (pathName: string): string[] => {
-	const fileDirectory = path.join(process.cwd(), pathName);
-	const allFiles = fs.readdirSync(fileDirectory);
-
-	return allFiles.map(file => {
-		const fullPath = path.join(fileDirectory, file);
-
-		return fs.readFileSync(fullPath, 'utf-8');
-	});
 };
 
-const readMarkdownFiles = () => {
-	const markdownFileArray = readFilesFromSystem('prisma/markdown');
+type DataArray = {
+	dataArray: {}[];
+};
 
+type DataArrayContent = {
+	data: {
+		name: string;
+		messages: string[];
+	};
+};
+
+const readMarkdownFiles = async (): Promise<Node[]> => {
 	const parser = new Parser();
 
-	return markdownFileArray.map(markdownFile => {
-		const parsed = parser.parse(markdownFile);
+	const markdownFiles = await getFilesFromDirectory('prisma/markdown');
+
+	const markdownContents = await Promise.all(
+		markdownFiles.map(async file => {
+			const content = await readContentFromFile('prisma/markdown', file);
+
+			return content;
+		}),
+	);
+
+	return markdownContents.map(markdownContent => {
+		const parsed = parser.parse(markdownContent);
 
 		return parsed;
 	});
@@ -45,11 +56,12 @@ const createNodeObject = (node: Node): NodeObject => {
 		obj.nodes.push(childObject);
 		currentChild = currentChild.next;
 	}
+
 	return obj;
 };
 
-const convertASTObjectToHtmlObject = () => {
-	const nodes = readMarkdownFiles();
+const convertASTNodesToHtmlElements = async () => {
+	const nodes = await readMarkdownFiles();
 	const htmlObjArray: {}[] = [];
 
 	nodes.forEach(node => {
@@ -67,20 +79,59 @@ const convertASTObjectToHtmlObject = () => {
 	return htmlObjArray;
 };
 
-const convertToJson = () => {
-	const htmlDataArray = convertASTObjectToHtmlObject();
+const convertToUnformattedJson = async () => {
+	const htmlElementArray = await convertASTNodesToHtmlElements();
 
-	// Create a new array for each iteration of the loop
 	const jsonData: string[] = [];
-	htmlDataArray.forEach((htmlData, index) => {
-		const htmlDataString = JSON.stringify(htmlData, null, 2);
-		jsonData.push(htmlDataString);
+	htmlElementArray.forEach(htmlElement => {
+		const htmlElementJson = JSON.stringify(htmlElement, null, 2);
+		jsonData.push(htmlElementJson);
 	});
 
-	// Combine all the arrays into a single array
-	const combinedJsonData = jsonData;
-	const jsonString = JSON.stringify(combinedJsonData, null, 2);
-	fs.writeFileSync('./prisma/json/htmlData.json', jsonString);
+	return jsonData;
 };
 
-convertToJson();
+const convertUnformattedJsonInputToObject = async () => {
+	const input = await convertToUnformattedJson();
+	const data: { html: string }[] = [];
+
+	for (const element of input) {
+		const { html } = JSON.parse(element);
+
+		const object = { html };
+		data.push(object);
+	}
+
+	const dataUserArray: DataArray = {
+		dataArray: [],
+	};
+
+	for (const item of data) {
+		const html: string = item.html;
+		const nameRegex = /name: '(.*?)'/;
+		const messagesRegex = /<p>(.*?)<\/p>/g;
+		const nameMatch = html.match(nameRegex);
+		const messagesMatch = html.match(messagesRegex);
+		if (nameMatch && messagesMatch) {
+			const name = nameMatch[1];
+			const messages = messagesMatch.map(m => m.replace(/<\/?p>/g, ''));
+
+			const dataArrayContent: DataArrayContent = {
+				data: {
+					name,
+					messages,
+				},
+			};
+
+			dataUserArray.dataArray.push(dataArrayContent);
+		}
+
+		await writeFilesToDir(
+			'prisma/json/ready',
+			'test.json',
+			JSON.stringify(dataUserArray, null, 2),
+		);
+	}
+};
+
+convertUnformattedJsonInputToObject();
